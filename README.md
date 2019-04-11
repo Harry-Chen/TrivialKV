@@ -1,6 +1,6 @@
 # TrivialKV
 
-A naive key-value database as the project of Storage Technology Foundations course/
+A naive key-value database as the project of Storage Technology Foundations course.
 
 ## Build
 
@@ -23,9 +23,9 @@ cd bench && ./build.sh && cd ..
 
 Or you can use `make TARGET_ENGINE=engine_example` for the example engine.
 
-## Run tests and benchmark
+## Tests and benchmark
 
-Go to your build output directory, then execute:
+Go to your build output directory (`build` for CMake and `.` for Makefile), then execute:
 
 ### Correctness tests
 
@@ -38,6 +38,5 @@ cd test
 ### Performance benchmark
 
 ```bash
-cd bench
-./bench THREAD_NUM READ_RATIO IS_SKEW
+./bench/bench THREAD_NUM READ_RATIO IS_SKEW
 ```
