@@ -1,18 +1,43 @@
-## All you have to do:
+# TrivialKV
 
-Complete engine_race/engine_race.[h,cc], and execute
+A naive key-value database as the project of Storage Technology Foundations course/
 
+## Build
+
+You can choose CMake or Makefile to build this project.
+
+### CMake
+
+```bash
+mkdir build && cd build
+cmake .. && make
 ```
+
+### Makefile
+
+```bash
 make
+cd test && ./build.sh && cd ..
+cd bench && ./build.sh && cd ..
 ```
-to build your own engine
 
-## Example for you
+Or you can use `make TARGET_ENGINE=engine_example` for the example engine.
 
-For quick start, we have already implemented a simple
-example engine in engine_example, you can view it and execute
+## Run tests and benchmark
 
+Go to your build output directory, then execute:
+
+### Correctness tests
+
+```bash
+cd test
+./{single_thread,multi_thread,crash}test # for CMake
+./run_tests.sh # for Makefile
 ```
-make TARGET_ENGINE=engine_example
+
+### Performance benchmark
+
+```bash
+cd bench
+./bench THREAD_NUM READ_RATIO IS_SKEW
 ```
-to build this example engine
