@@ -27,12 +27,13 @@ struct IndexItem {
     using DataType = T;
     char key[MAX_KEY_LENGTH + 1];
     T data;
-    int16_t balance_factor;
+    int16_t balance_factor = 0;
     int32_t left = -1;
     int32_t right = -1;
 
     inline int compare(const IndexItem &rhs) const {
-        return strcmp(key, rhs.key);
+        auto result = strcmp(key, rhs.key);
+        return result < 0 ? -1 : result > 0 ? 1 : 0;
     }
 };
 
@@ -43,6 +44,7 @@ public:
     using NodeData = Node::DataType;
 
     explicit IndexTree(const std::string &filename);
+    ~IndexTree();
     const NodeData &search(const PolarString &key);
     void insert(const PolarString &key, IndexData data);
 private:
@@ -50,7 +52,7 @@ private:
     uint32_t allocateNode();
     int balance(int32_t &root);
     bool _insert(int32_t &root, int32_t new_node, int &height_change);
-    int rotateOnce(int32_t &root, int direction);
+    int rotateOnce(int32_t &root, int direction, bool update = true);
     int rotateTwice(int32_t &root, int direction);
 
     int index_file_fd;

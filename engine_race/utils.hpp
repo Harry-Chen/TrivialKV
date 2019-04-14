@@ -23,4 +23,13 @@ inline long round_up(long a, long b) {
     return ((a + b - 1) / b) * b;
 }
 
+inline static int min(int a, int b) {
+    return  (a < b) ? a : b;
+}
+
+// Return the maximum of two numbers
+inline static int max(int a, int b) {
+    return  (a > b) ? a : b;
+}
+
 #endif //TRIVIALKV_UTILS_H

@@ -36,7 +36,7 @@ IndexTree::IndexTree(const std::string &filename) {
     current_capacity = (uint32_t) (map_size - 2 * sizeof(uint32_t)) / sizeof(Node);
 
     // load index from file
-    file_map = mmap(nullptr, map_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, index_file_fd, 0);
+    file_map = mmap(nullptr, map_size, PROT_READ | PROT_WRITE, MAP_SHARED, index_file_fd, 0);
     assert(file_map != MAP_FAILED);
     initFileMap();
 
@@ -48,13 +48,18 @@ IndexTree::IndexTree(const std::string &filename) {
 
 }
 
+IndexTree::~IndexTree() {
+    munmap(file_map, index_file_size);
+    close(index_file_fd);
+}
+
 
 const IndexTree::NodeData &IndexTree::search(const PolarString &key) {
     auto current = *root_node;
     while (current != -1) {
         auto result = strcmp(key.data(), nodes[current].key);
         if (result == 0) break;
-        current = result == -1 ? nodes[current].left : nodes[current].right;
+        current = result < 0 ? nodes[current].left : nodes[current].right;
     }
     if (current == -1) return INDEX_NOT_FOUND;
     else return nodes[current].data;
@@ -67,6 +72,7 @@ void IndexTree::insert(const PolarString &key, IndexData data) {
     auto node = new (&nodes[new_root]) Node();
     node->data = data;
     memcpy(node->key, key.data(), key.size());
+    node->key[key.size()] = '\0';
     // insert it to the tree
     int change;
     _insert(*root_node, new_root, change);
@@ -100,7 +106,7 @@ int IndexTree::balance(int32_t &root) {
 }
 
 
-int IndexTree::rotateOnce(int32_t &root, int direction) {
+int IndexTree::rotateOnce(int32_t &root, int direction, bool update) {
 
     auto old_root = root;
     auto &_old_root = nodes[root];
@@ -116,7 +122,9 @@ int IndexTree::rotateOnce(int32_t &root, int direction) {
     other_dir_id = current_root_this_dir;
     current_root_this_dir = old_root;
 
-    _old_root.balance_factor = -(direction == -1 ? --current_root.balance_factor : ++current_root.balance_factor);
+    if (update) {
+        _old_root.balance_factor = -(direction == -1 ? --current_root.balance_factor : ++current_root.balance_factor);
+    }
 
     return height_change;
 }
@@ -125,11 +133,16 @@ int IndexTree::rotateOnce(int32_t &root, int direction) {
 int IndexTree::rotateTwice(int32_t &root, int direction) {
     if (direction == -1) {
         rotateOnce(nodes[root].left, -1);
-        rotateOnce(root, 1);
+        rotateOnce(root, 1, false);
     } else if (direction == 1){
         rotateOnce(nodes[root].right, 1);
-        rotateOnce(root, -1);
+        rotateOnce(root, -1, false);
     }
+
+    auto &_root = nodes[root];
+    nodes[_root.left].balance_factor = (int16_t) -max(_root.balance_factor, 0);
+    nodes[_root.right].balance_factor = (int16_t) -min(_root.balance_factor, 0);
+
     return 1;
 }
 
@@ -147,15 +160,20 @@ bool IndexTree::_insert(int32_t &root, int32_t new_node, int &height_change) {
 
     int height_increase = 0;
 
-    auto result = _root.compare(_new);
+    auto result = _new.compare(_root);
 
     if (result != 0) {
-        auto sub_tree_id = result == -1 ? _root.left : _root.right;
+        auto &sub_tree_id = result == -1 ? _root.left : _root.right;
         if (_insert(sub_tree_id, new_node, height_change)) {
             return true;
         }
         height_increase = result * height_change;
     } else {
+        // found existing node, replace it
+        root = new_node;
+        _new.left = _root.left;
+        _new.right = _root.right;
+        _new.balance_factor = _root.balance_factor;
         return true;
     }
 
@@ -175,6 +193,7 @@ bool IndexTree::_insert(int32_t &root, int32_t new_node, int &height_change) {
 // allocate a new tree node from mapped memory
 uint32_t IndexTree::allocateNode() {
     if (*node_count >= current_capacity) {
+        printf("Re-mapping index file to extend size\n");
         // extend the index file size
         int ret = ftruncate(index_file_fd, index_file_size * 2);
         assert(ret == 0);
@@ -184,8 +203,8 @@ uint32_t IndexTree::allocateNode() {
         index_file_size *= 2;
         current_capacity = (uint32_t) (index_file_size - 2 * sizeof(uint32_t)) / sizeof(Node);
     }
-
-    return *node_count++;
+    *node_count += 1;
+    return *node_count - 1;
 }
 
 
@@ -193,4 +212,5 @@ void IndexTree::initFileMap() {
     node_count = reinterpret_cast<uint32_t*>(file_map);
     root_node = reinterpret_cast<int32_t*>(node_count + 1);
     nodes = reinterpret_cast<Node*>(root_node + 1);
+    printf("Index file map: %p %p %p\n", node_count, root_node, nodes);
 }

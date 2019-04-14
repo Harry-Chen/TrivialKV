@@ -15,18 +15,22 @@ using polar_race::RetCode;
 class Database {
 public:
     Database(const std::string &dir, int id);
+    ~Database();
     RetCode write(const PolarString &key, const PolarString &value);
     RetCode read(const PolarString &key, std::string *value);
 private:
     static const int MAX_SLICE_COUNT = 1 << 12;
     static const int SLICE_SIZE = 32 * 1024 * 1024;
     pthread_rwlock_t rwlock;
+    int id;
     std::string file_prefix;
     IndexTree *index;
+    int slice_fd[MAX_SLICE_COUNT];
     char *slices[MAX_SLICE_COUNT];
-    uint8_t *currentSlice;
+    char *currentSlice;
 
     // memory mapped metadata
+    int metadata_fd;
     void *metadata;
     uint32_t *sliceCount;
     uint32_t *currentSliceNumber;
