@@ -49,14 +49,14 @@ IndexTree::IndexTree(const std::string &filename) {
 }
 
 
-IndexTree::NodeData IndexTree::search(const PolarString &key) {
+const IndexTree::NodeData &IndexTree::search(const PolarString &key) {
     auto current = *root_node;
     while (current != -1) {
         auto result = strcmp(key.data(), nodes[current].key);
         if (result == 0) break;
         current = result == -1 ? nodes[current].left : nodes[current].right;
     }
-    if (current == -1) return {-1, -1};
+    if (current == -1) return INDEX_NOT_FOUND;
     else return nodes[current].data;
 }
 

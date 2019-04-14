@@ -14,8 +14,11 @@ using polar_race::PolarString;
 
 struct IndexData {
     int32_t slice;
-    int32_t offset;
+    uint32_t offset;
+    uint32_t length;
 };
+
+const IndexData INDEX_NOT_FOUND = {-1, 0, 0};
 
 const int MAX_KEY_LENGTH = 1024;
 
@@ -39,8 +42,8 @@ public:
     using Node = IndexItem<IndexData>;
     using NodeData = Node::DataType;
 
-    IndexTree(const std::string &filename);
-    NodeData search(const PolarString &key);
+    explicit IndexTree(const std::string &filename);
+    const NodeData &search(const PolarString &key);
     void insert(const PolarString &key, IndexData data);
 private:
     void initFileMap();

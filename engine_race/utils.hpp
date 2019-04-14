@@ -5,17 +5,16 @@
 #ifndef TRIVIALKV_UTILS_H
 #define TRIVIALKV_UTILS_H
 
+#include <cassert>
 #include "engine_race.h"
 
 using polar_race::PolarString;
 
 inline __attribute__((always_inline)) int get_shard_number(const PolarString &key, const int shard_number) {
     auto shard_bits = __builtin_ctz(shard_number);
+    assert(shard_bits <= 8);
     auto shard_num = 0;
-    for (int i = 0; i < shard_bits; ++i) {
-        shard_num <<= 1;
-        shard_num += i < key.size() ? key[i] : 0;
-    }
+    shard_num = key.data()[0] >> (8 - shard_bits);
     return shard_num;
 }
 
