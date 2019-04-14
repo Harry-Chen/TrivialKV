@@ -17,7 +17,7 @@
 
 IndexTree::IndexTree(const std::string &filename) {
     struct stat st = {};
-    index_file_fd = open(filename.c_str(), O_RDWR|O_CREAT);
+    index_file_fd = open(filename.c_str(), O_RDWR|O_CREAT, 0644);
     assert(index_file_fd > 0);
     fstat(index_file_fd, &st);
     index_file_size = (size_t) st.st_size;

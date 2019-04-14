@@ -70,7 +70,7 @@ void Database::initIndex() {
 }
 
 void Database::initSlices() {
-    metadata_fd = open((file_prefix + ".metadata").c_str(), O_RDWR|O_CREAT);
+    metadata_fd = open((file_prefix + ".metadata").c_str(), O_RDWR|O_CREAT, 0644);
     assert(metadata_fd > 0);
     struct stat st = {};
     fstat(metadata_fd, &st);
@@ -110,7 +110,7 @@ void Database::initSlices() {
 int Database::createNewSlice() {
     auto new_slice_id = *sliceCount;
     auto filename = file_prefix + "." + std::to_string(new_slice_id) + ".data";
-    int data_fd = open(filename.c_str(), O_RDWR|O_CREAT);
+    int data_fd = open(filename.c_str(), O_RDWR|O_CREAT, 0644);
     assert(data_fd > 0);
     ftruncate(data_fd, SLICE_SIZE);
     *currentSliceNumber = new_slice_id;
