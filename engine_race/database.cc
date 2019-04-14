@@ -96,7 +96,7 @@ void Database::initSlices() {
     } else {
         for (int i = 0; i < *sliceCount; ++i) {
             auto filename = file_prefix + "." + std::to_string(i) + ".data";
-            slice_fd[i] = open(filename.c_str(), O_RDWR);
+            slice_fd[i] = open(filename.c_str(), O_RDWR, 0644);
             assert(slice_fd[i] > 0);
             mapSlice(slice_fd[i], i);
         }
