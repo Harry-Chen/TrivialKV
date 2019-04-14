@@ -14,7 +14,7 @@ inline __attribute__((always_inline)) int get_shard_number(const PolarString &ke
     auto shard_bits = __builtin_ctz(shard_number);
     assert(shard_bits <= 8);
     auto shard_num = 0;
-    shard_num = key.data()[0] >> (8 - shard_bits);
+    shard_num = (uint8_t) (key.data()[0]) >> (8 - shard_bits);
     return shard_num;
 }
 
