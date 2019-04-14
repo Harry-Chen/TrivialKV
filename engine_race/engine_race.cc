@@ -1,5 +1,6 @@
 // Copyright [2018] Alibaba Cloud All rights reserved
 #include "engine_race.h"
+#include "utils.hpp"
 
 namespace polar_race {
 
@@ -15,26 +16,33 @@ Engine::~Engine() {
  */
 
 // 1. Open engine
-RetCode EngineRace::Open(const std::string& name, Engine** eptr) {
-  *eptr = NULL;
-  EngineRace *engine_race = new EngineRace(name);
-
-  *eptr = engine_race;
+RetCode EngineRace::Open(const std::string &dir, Engine** ptr) {
+  *ptr = new EngineRace(dir);
   return kSucc;
+}
+
+
+EngineRace::EngineRace(const std::string &dir) {
+  for(auto i = 0; i < DATABASE_SHARDS; ++i) {
+    databases[i] = new Database(dir, i);
+  }
 }
 
 // 2. Close engine
 EngineRace::~EngineRace() {
+  for(auto db: databases) {
+    delete db;
+  }
 }
 
 // 3. Write a key-value pair into engine
-RetCode EngineRace::Write(const PolarString& key, const PolarString& value) {
-  return kSucc;
+RetCode EngineRace::Write(const PolarString &key, const PolarString &value) {
+  return databases[get_shard_number(key, DATABASE_SHARDS)]->write(key, value);
 }
 
 // 4. Read value of a key
-RetCode EngineRace::Read(const PolarString& key, std::string* value) {
-  return kSucc;
+RetCode EngineRace::Read(const PolarString &key, std::string *value) {
+  return databases[get_shard_number(key, DATABASE_SHARDS)]->read(key, value);
 }
 
 /*
@@ -48,7 +56,7 @@ RetCode EngineRace::Read(const PolarString& key, std::string* value) {
 // upper=="" is treated as a key after all keys in the database.
 // Therefore the following call will traverse the entire database:
 //   Range("", "", visitor)
-RetCode EngineRace::Range(const PolarString& lower, const PolarString& upper,
+RetCode EngineRace::Range(const PolarString &lower, const PolarString &upper,
     Visitor &visitor) {
   return kSucc;
 }

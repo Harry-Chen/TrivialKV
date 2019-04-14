@@ -1,6 +1,6 @@
 # TrivialKV
 
-A naive key-value database as the project of Storage Technology Foundations course.
+A naive key-value Database as the project of Storage Technology Foundations course.
 
 ## Build
 

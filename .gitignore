@@ -59,3 +59,4 @@ _deps
 test/*_test
 .idea
 cmake-build*
+build
