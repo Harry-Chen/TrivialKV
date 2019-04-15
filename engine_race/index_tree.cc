@@ -142,32 +142,33 @@ int IndexTree::rotateTwice(int32_t &root, int direction) {
     auto &_root = nodes[root];
     nodes[_root.left].balance_factor = (int16_t) -max(_root.balance_factor, 0);
     nodes[_root.right].balance_factor = (int16_t) -min(_root.balance_factor, 0);
+    _root.balance_factor = 0;
 
     return 1;
 }
 
 
-bool IndexTree::_insert(int32_t &root, int32_t new_node, int &height_change) {
+bool IndexTree::_insert(int32_t &root, int32_t new_node, int &balance_change) {
 
     if (root == -1) {
         root = new_node;
-        height_change = 1;
+        balance_change = 1;
         return false;
     }
 
     auto &_root = nodes[root];
     auto &_new = nodes[new_node];
-
+    balance_change = 0;
     int height_increase = 0;
 
     auto result = _new.compare(_root);
 
     if (result != 0) {
         auto &sub_tree_id = result == -1 ? _root.left : _root.right;
-        if (_insert(sub_tree_id, new_node, height_change)) {
+        if (_insert(sub_tree_id, new_node, balance_change)) {
             return true;
         }
-        height_increase = result * height_change;
+        height_increase = result * balance_change;
     } else {
         // found existing node, replace it
         root = new_node;
@@ -180,9 +181,9 @@ bool IndexTree::_insert(int32_t &root, int32_t new_node, int &height_change) {
     _root.balance_factor += height_increase;
 
     if (height_increase != 0 && _root.balance_factor != 0) {
-        height_change = 1 - balance(root);
+        balance_change = 1 - balance(root);
     } else {
-        height_change = 0;
+        balance_change = 0;
     }
 
     return false;
