@@ -52,7 +52,7 @@ private:
     uint32_t allocateNode();
     int balance(int32_t &root);
     bool _insert(int32_t &root, int32_t new_node, int &balance_change);
-    int rotateOnce(int32_t &root, int direction, bool update = true);
+    int rotateOnce(int32_t &root, int direction);
     int rotateTwice(int32_t &root, int direction);
 
     int index_file_fd;

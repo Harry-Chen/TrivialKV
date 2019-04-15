@@ -106,44 +106,75 @@ int IndexTree::balance(int32_t &root) {
 }
 
 
-int IndexTree::rotateOnce(int32_t &root, int direction, bool update) {
-
+int IndexTree::rotateOnce(int32_t &root, int direction) {
+//    printf("Rotate once\n");
     auto old_root = root;
     auto &_old_root = nodes[root];
-    auto &other_dir_id = direction == -1 ? nodes[root].right : nodes[root].left;
-    auto &other_dir_node = nodes[other_dir_id];
+    auto &old_root_other_dir = direction == -1 ? _old_root.right : _old_root.left;
+    auto &_other_dir = nodes[old_root_other_dir];
 
-    int height_change = other_dir_node.balance_factor == 0 ? 0 : 1;
+    int height_change = _other_dir.balance_factor == 0 ? 0 : 1;
 
     // do the rotation
-    root = other_dir_id;
-    auto &current_root = nodes[root];
-    auto &current_root_this_dir = direction == -1 ? current_root.left : current_root.right;
-    other_dir_id = current_root_this_dir;
-    current_root_this_dir = old_root;
+    root = old_root_other_dir;
+    auto &_new_root = nodes[root];
+    auto &new_root_this_dir = direction == -1 ? _new_root.left : _new_root.right;
+    old_root_other_dir = new_root_this_dir;
+    new_root_this_dir = old_root;
 
-    if (update) {
-        _old_root.balance_factor = -(direction == -1 ? --current_root.balance_factor : ++current_root.balance_factor);
-    }
+    _old_root.balance_factor = -(direction == -1 ? --_new_root.balance_factor : ++_new_root.balance_factor);
 
     return height_change;
 }
 
 
 int IndexTree::rotateTwice(int32_t &root, int direction) {
+    auto old_root = root;
+    auto &_old_root = nodes[root];
+    auto old_right = _old_root.right;
+    auto &_old_right = nodes[old_right];
+    auto old_left = _old_root.left;
+    auto &_old_left = nodes[old_left];
+
+//    printf("Before rotate twice %d root: %d %d %d\n", direction, root, _old_root.left, _old_root.right);
+//    if (_old_root.left != -1) {
+//        printf("\tleft: %d %d %d\n", _old_root.left, _old_left.left, _old_left.right);
+//    }
+//    if (_old_root.right != -1) {
+//        printf("\tright: %d %d %d\n", _old_root.right, _old_right.left, _old_right.right);
+//    }
     if (direction == -1) {
-        rotateOnce(nodes[root].left, -1);
-        rotateOnce(root, 1, false);
+        root = _old_left.right;
+        auto &_new_root = nodes[root];
+        // re-attach
+        _old_root.left = _new_root.right;
+        _old_left.right = _new_root.left;
+        _new_root.left = old_left;
+        _new_root.right = old_root;
     } else if (direction == 1){
-        rotateOnce(nodes[root].right, 1);
-        rotateOnce(root, -1, false);
+        root = _old_right.left;
+        auto &_new_root = nodes[root];
+        // re-attach
+        _old_root.right = _new_root.left;
+        _old_right.left = _new_root.right;
+        _new_root.right = old_right;
+        _new_root.left = old_root;
     }
 
-    auto &_root = nodes[root];
-    nodes[_root.left].balance_factor = (int16_t) -max(_root.balance_factor, 0);
-    nodes[_root.right].balance_factor = (int16_t) -min(_root.balance_factor, 0);
-    _root.balance_factor = 0;
-
+    auto &new_root = nodes[root];
+    auto &_new_left = nodes[new_root.left];
+    auto &_new_right = nodes[new_root.right];
+    _new_left.balance_factor = (int16_t) -max(new_root.balance_factor, 0);
+    _new_right.balance_factor = (int16_t) -min(new_root.balance_factor, 0);
+    new_root.balance_factor = 0;
+//
+//    printf("After rotate twice: %d %d %d\n", root, new_root.left, new_root.right);
+//    if (new_root.left != -1) {
+//        printf("\tleft: %d %d %d\n", new_root.left, _new_left.left, _new_left.right);
+//    }
+//    if (new_root.right != -1) {
+//        printf("\tright: %d %d %d\n", new_root.right, _new_right.left, _new_right.right);
+//    }
     return 1;
 }
 
@@ -160,6 +191,8 @@ bool IndexTree::_insert(int32_t &root, int32_t new_node, int &balance_change) {
     auto &_new = nodes[new_node];
     balance_change = 0;
     int height_increase = 0;
+
+//    printf("Insert querying: %d left %d right %d key %s\n", root, _root.left, _root.right, _root.key);
 
     auto result = _new.compare(_root);
 
