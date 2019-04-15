@@ -32,4 +32,13 @@ inline static int max(int a, int b) {
     return  (a > b) ? a : b;
 }
 
+inline __attribute__((always_inline)) int fast_string_cmp(const char* a, const char *b) {
+    auto fast_this = reinterpret_cast<const int64_t*>(a);
+    auto fast_that = reinterpret_cast<const int64_t*>(b);
+    auto fast_result = *fast_this - *fast_that;
+    if (fast_result != 0) return fast_result < 0 ? -1 : 1;
+    auto result = strcmp(a, b);
+    return result < 0 ? -1 : result > 0 ? 1 : 0;
+}
+
 #endif //TRIVIALKV_UTILS_H

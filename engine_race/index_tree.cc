@@ -57,7 +57,7 @@ IndexTree::~IndexTree() {
 const IndexTree::NodeData &IndexTree::search(const PolarString &key) {
     auto current = *root_node;
     while (current != -1) {
-        auto result = strcmp(key.data(), nodes[current].key);
+        auto result = fast_string_cmp(key.data(), nodes[current].key);
         if (result == 0) break;
         current = result < 0 ? nodes[current].left : nodes[current].right;
     }
@@ -194,7 +194,7 @@ bool IndexTree::_insert(int32_t &root, int32_t new_node, int &balance_change) {
 
 //    printf("Insert querying: %d left %d right %d key %s\n", root, _root.left, _root.right, _root.key);
 
-    auto result = _new.compare(_root);
+    auto result = fast_string_cmp(_new.key, _root.key);
 
     if (result != 0) {
         auto &sub_tree_id = result == -1 ? _root.left : _root.right;

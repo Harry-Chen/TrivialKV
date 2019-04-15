@@ -25,16 +25,11 @@ const int MAX_KEY_LENGTH = 1024;
 template<class T>
 struct IndexItem {
     using DataType = T;
-    char key[MAX_KEY_LENGTH + 1];
+    char key[MAX_KEY_LENGTH + 1] = { 0 };
     T data;
     int16_t balance_factor = 0;
     int32_t left = -1;
     int32_t right = -1;
-
-    inline int compare(const IndexItem &rhs) const {
-        auto result = strcmp(key, rhs.key);
-        return result < 0 ? -1 : result > 0 ? 1 : 0;
-    }
 };
 
 
