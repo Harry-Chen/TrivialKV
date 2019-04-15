@@ -61,7 +61,7 @@ const IndexTree::NodeData &IndexTree::search(const PolarString &key) {
         if (result == 0) break;
         current = result < 0 ? nodes[current].left : nodes[current].right;
     }
-    if (current == -1) return INDEX_NOT_FOUND;
+    if (__glibc_unlikely(current == -1)) return INDEX_NOT_FOUND;
     else return nodes[current].data;
 }
 
@@ -196,7 +196,7 @@ bool IndexTree::_insert(int32_t &root, int32_t new_node, int &balance_change) {
 
     auto result = fast_string_cmp(_new.key, _root.key);
 
-    if (result != 0) {
+    if (__glibc_likely(result != 0)) {
         auto &sub_tree_id = result == -1 ? _root.left : _root.right;
         if (_insert(sub_tree_id, new_node, balance_change)) {
             return true;
@@ -226,16 +226,16 @@ bool IndexTree::_insert(int32_t &root, int32_t new_node, int &balance_change) {
 
 // allocate a new tree node from mapped memory
 uint32_t IndexTree::allocateNode() {
-    if (*node_count >= current_capacity) {
+    if (__glibc_unlikely(*node_count >= current_capacity)) {
 //        printf("Re-mapping index file to extend size\n");
         // extend the index file size
         int ret = ftruncate(index_file_fd, index_file_size * 2);
         assert(ret == 0);
         file_map = mremap(file_map, index_file_size, index_file_size * 2, MREMAP_MAYMOVE);
         assert(file_map != MAP_FAILED);
-        initFileMap();
         index_file_size *= 2;
         current_capacity = (uint32_t) (index_file_size - 2 * sizeof(uint32_t)) / sizeof(Node);
+        initFileMap();
     }
     *node_count += 1;
     return *node_count - 1;
@@ -243,6 +243,7 @@ uint32_t IndexTree::allocateNode() {
 
 
 void IndexTree::initFileMap() {
+    madvise(file_map, index_file_size, MADV_RANDOM);
     node_count = reinterpret_cast<uint32_t*>(file_map);
     root_node = reinterpret_cast<int32_t*>(node_count + 1);
     nodes = reinterpret_cast<Node*>(root_node + 1);

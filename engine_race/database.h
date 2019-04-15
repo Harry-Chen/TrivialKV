@@ -12,6 +12,12 @@
 using polar_race::PolarString;
 using polar_race::RetCode;
 
+struct DatabaseMetadata {
+    uint32_t sliceCount;
+    uint32_t currentSliceNumber;
+    uint32_t currentOffset;
+};
+
 class Database {
 public:
     Database(const std::string &dir, int id);
@@ -31,11 +37,7 @@ private:
 
     // memory mapped metadata
     int metadata_fd;
-    void *metadata;
-    uint32_t *sliceCount;
-    uint32_t *currentSliceNumber;
-    uint32_t *currentOffset;
-
+    DatabaseMetadata *metadata;
 
     void initIndex();
     void initSlices();
