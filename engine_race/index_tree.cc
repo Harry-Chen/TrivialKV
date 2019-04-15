@@ -227,7 +227,7 @@ bool IndexTree::_insert(int32_t &root, int32_t new_node, int &balance_change) {
 // allocate a new tree node from mapped memory
 uint32_t IndexTree::allocateNode() {
     if (*node_count >= current_capacity) {
-        printf("Re-mapping index file to extend size\n");
+//        printf("Re-mapping index file to extend size\n");
         // extend the index file size
         int ret = ftruncate(index_file_fd, index_file_size * 2);
         assert(ret == 0);
@@ -246,5 +246,5 @@ void IndexTree::initFileMap() {
     node_count = reinterpret_cast<uint32_t*>(file_map);
     root_node = reinterpret_cast<int32_t*>(node_count + 1);
     nodes = reinterpret_cast<Node*>(root_node + 1);
-    printf("Index file map: %p %p %p\n", node_count, root_node, nodes);
+//    printf("Index file map: %p %p %p\n", node_count, root_node, nodes);
 }

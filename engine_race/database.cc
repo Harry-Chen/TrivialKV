@@ -14,7 +14,7 @@
 Database::Database(const std::string &dir, int id): id(id) {
     pthread_rwlock_init(&rwlock, nullptr);
     file_prefix = dir + "." + std::to_string(id);
-    printf("Database shard %d initing...\n", id);
+//    printf("Database shard %d initing...\n", id);
     initIndex();
     initSlices();
 }
@@ -100,7 +100,7 @@ void Database::initSlices() {
             assert(slice_fd[i] > 0);
             mapSlice(slice_fd[i], i);
         }
-        printf("%d %d %d\n", *sliceCount, *currentSliceNumber, *currentOffset);
+//        printf("%d %d %d\n", *sliceCount, *currentSliceNumber, *currentOffset);
         currentSlice = slices[*sliceCount - 1];
     }
 
