@@ -6,14 +6,16 @@
 #define TRIVIALKV_UTILS_H
 
 #include <cassert>
-#include "engine_race.h"
 
 using polar_race::PolarString;
 
 #define inline inline __attribute__((always_inline))
 
-inline int get_shard_number(const PolarString &key, const int shard_number) {
-    auto shard_bits = __builtin_ctz(shard_number);
+// at most 64 concurrent access
+const int DATABASE_SHARDS = 1 << 7;
+
+inline int get_shard_number(const PolarString &key) {
+    auto shard_bits = __builtin_ctz(DATABASE_SHARDS);
 //    assert(shard_bits <= 8);
     auto shard_num = 0;
     shard_num = (uint8_t) (key.data()[0]) >> (8 - shard_bits);

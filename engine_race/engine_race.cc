@@ -37,12 +37,12 @@ EngineRace::~EngineRace() {
 
 // 3. Write a key-value pair into engine
 RetCode EngineRace::Write(const PolarString &key, const PolarString &value) {
-  return databases[get_shard_number(key, DATABASE_SHARDS)]->write(key, value);
+  return databases[get_shard_number(key)]->write(key, value);
 }
 
 // 4. Read value of a key
 RetCode EngineRace::Read(const PolarString &key, std::string *value) {
-  return databases[get_shard_number(key, DATABASE_SHARDS)]->read(key, value);
+  return databases[get_shard_number(key)]->read(key, value);
 }
 
 /*
@@ -58,7 +58,7 @@ RetCode EngineRace::Read(const PolarString &key, std::string *value) {
 //   Range("", "", visitor)
 RetCode EngineRace::Range(const PolarString &lower, const PolarString &upper,
     Visitor &visitor) {
-  return kSucc;
+  return kNotSupported;
 }
 
 }  // namespace polar_race

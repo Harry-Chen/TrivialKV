@@ -3,6 +3,8 @@
 #define ENGINE_RACE_ENGINE_RACE_H_
 #include <string>
 #include "include/engine.h"
+
+#include "utils.hpp"
 #include "database.h"
 
 namespace polar_race {
@@ -30,7 +32,6 @@ class EngineRace : public Engine  {
       Visitor &visitor) override;
 
  private:
-    const static int DATABASE_SHARDS = 64;
     Database *databases[DATABASE_SHARDS] = {nullptr};
 };
 
