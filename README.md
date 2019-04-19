@@ -4,7 +4,7 @@ A naive key-value Database as the project of Storage Technology Foundations cour
 
 ## Build
 
-You can choose CMake or Makefile to build this project.
+You can choose CMake or Makefile to build this project. It is recommended to use CMake.
 
 ### CMake
 
